@@ -10,10 +10,8 @@ function CustomerForm() {
   const isEdit = Boolean(id);
 
   const [form, setForm] = useState({
-    name: '',
-    dateOfBirth: null,
-    nicNumber: '',
-    mobileNumbers: [{ number: '' }],
+    name: '', dateOfBirth: null, nicNumber: '',
+    mobileNumbers: [''],
     addresses: [{ addressLine1: '', addressLine2: '', cityId: '', countryId: '' }],
     familyMemberIds: [],
   });
@@ -25,9 +23,20 @@ function CustomerForm() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getAllCustomers().then(res => setAllCustomers(res.data));
-    fetch('http://localhost:8080/api/cities').then(r => r.json()).then(setCities);
-    fetch('http://localhost:8080/api/countries').then(r => r.json()).then(setCountries);
+    // Fix: use .content for paged response
+    getAllCustomers()
+      .then(res => setAllCustomers(res.data.content || res.data))
+      .catch(() => setAllCustomers([]));
+
+   fetch('http://localhost:8080/api/cities')
+  .then(r => r.json())
+  .then(data => setCities(Array.isArray(data) ? data : []))
+  .catch(() => setCities([]));
+
+fetch('http://localhost:8080/api/countries')
+  .then(r => r.json())
+  .then(data => setCountries(Array.isArray(data) ? data : []))
+  .catch(() => setCountries([]));
 
     if (isEdit) {
       getCustomerById(id).then(res => {
@@ -36,7 +45,7 @@ function CustomerForm() {
           name: c.name,
           dateOfBirth: c.dateOfBirth ? new Date(c.dateOfBirth) : null,
           nicNumber: c.nicNumber,
-          mobileNumbers: c.mobileNumbers?.length ? c.mobileNumbers : [{ number: '' }],
+          mobileNumbers: c.mobileNumbers?.length ? c.mobileNumbers : [''],
           addresses: c.addresses?.length ? c.addresses : [{ addressLine1: '', addressLine2: '', cityId: '', countryId: '' }],
           familyMemberIds: c.familyMembers?.map(f => f.id) || [],
         });
@@ -44,16 +53,14 @@ function CustomerForm() {
     }
   }, [id, isEdit]);
 
-  // Mobile handlers
-  const addMobile = () => setForm(f => ({ ...f, mobileNumbers: [...f.mobileNumbers, { number: '' }] }));
+  const addMobile = () => setForm(f => ({ ...f, mobileNumbers: [...f.mobileNumbers, ''] }));
   const removeMobile = (i) => setForm(f => ({ ...f, mobileNumbers: f.mobileNumbers.filter((_, idx) => idx !== i) }));
   const updateMobile = (i, val) => setForm(f => {
     const updated = [...f.mobileNumbers];
-    updated[i] = { number: val };
+    updated[i] = val;
     return { ...f, mobileNumbers: updated };
   });
 
-  // Address handlers
   const addAddress = () => setForm(f => ({ ...f, addresses: [...f.addresses, { addressLine1: '', addressLine2: '', cityId: '', countryId: '' }] }));
   const removeAddress = (i) => setForm(f => ({ ...f, addresses: f.addresses.filter((_, idx) => idx !== i) }));
   const updateAddress = (i, field, val) => setForm(f => {
@@ -62,12 +69,11 @@ function CustomerForm() {
     return { ...f, addresses: updated };
   });
 
-  // Family member handlers
   const toggleFamily = (memberId) => {
     setForm(f => ({
       ...f,
       familyMemberIds: f.familyMemberIds.includes(memberId)
-        ? f.familyMemberIds.filter(id => id !== memberId)
+        ? f.familyMemberIds.filter(fid => fid !== memberId)
         : [...f.familyMemberIds, memberId]
     }));
   };
@@ -80,11 +86,14 @@ function CustomerForm() {
     }
     setLoading(true);
     const payload = {
-      ...form,
-      dateOfBirth: form.dateOfBirth.toISOString().split('T')[0],
-      mobileNumbers: form.mobileNumbers.filter(m => m.number.trim() !== ''),
-      addresses: form.addresses.filter(a => a.addressLine1.trim() !== ''),
-    };
+  name: form.name,
+  nicNumber: form.nicNumber,
+  dateOfBirth: form.dateOfBirth.toISOString().split('T')[0],
+  // ✅ plain strings, NOT objects
+  mobileNumbers: form.mobileNumbers.filter(m => m.trim() !== ''),
+  addresses: form.addresses.filter(a => a.addressLine1.trim() !== ''),
+  familyMemberIds: form.familyMemberIds,
+};
     try {
       if (isEdit) await updateCustomer(id, payload);
       else await createCustomer(payload);
@@ -100,7 +109,6 @@ function CustomerForm() {
       <h2>{isEdit ? 'Edit Customer' : 'Add Customer'}</h2>
       {error && <p style={styles.error}>{error}</p>}
 
-      {/* Basic Info */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Basic Information</h3>
         <div style={styles.row}>
@@ -127,12 +135,12 @@ function CustomerForm() {
         </div>
       </div>
 
-      {/* Mobile Numbers */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Mobile Numbers</h3>
         {form.mobileNumbers.map((m, i) => (
           <div key={i} style={styles.inlineRow}>
-            <input style={styles.input} placeholder="Mobile number" value={m.number} onChange={e => updateMobile(i, e.target.value)} />
+            <input style={styles.input} placeholder="Mobile number"
+              value={m} onChange={e => updateMobile(i, e.target.value)} />
             {form.mobileNumbers.length > 1 && (
               <button style={styles.btnRemove} onClick={() => removeMobile(i)}>✕</button>
             )}
@@ -141,18 +149,17 @@ function CustomerForm() {
         <button style={styles.btnAdd} onClick={addMobile}>+ Add Mobile</button>
       </div>
 
-      {/* Addresses */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Addresses</h3>
         {form.addresses.map((a, i) => (
           <div key={i} style={styles.addressBlock}>
             <input style={styles.input} placeholder="Address Line 1" value={a.addressLine1} onChange={e => updateAddress(i, 'addressLine1', e.target.value)} />
             <input style={styles.input} placeholder="Address Line 2" value={a.addressLine2} onChange={e => updateAddress(i, 'addressLine2', e.target.value)} />
-            <select style={styles.input} value={a.cityId} onChange={e => updateAddress(i, 'cityId', e.target.value)}>
+            <select style={styles.input} value={a.cityId} onChange={e => updateAddress(i, 'cityId', Number(e.target.value))}>
               <option value="">Select City</option>
               {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            <select style={styles.input} value={a.countryId} onChange={e => updateAddress(i, 'countryId', e.target.value)}>
+            <select style={styles.input} value={a.countryId} onChange={e => updateAddress(i, 'countryId', Number(e.target.value))}>
               <option value="">Select Country</option>
               {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -164,24 +171,20 @@ function CustomerForm() {
         <button style={styles.btnAdd} onClick={addAddress}>+ Add Address</button>
       </div>
 
-      {/* Family Members */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Family Members</h3>
         <div style={styles.familyGrid}>
           {allCustomers.filter(c => String(c.id) !== String(id)).map(c => (
             <label key={c.id} style={styles.checkLabel}>
-              <input
-                type="checkbox"
+              <input type="checkbox"
                 checked={form.familyMemberIds.includes(c.id)}
-                onChange={() => toggleFamily(c.id)}
-              />
+                onChange={() => toggleFamily(c.id)} />
               {' '}{c.name} ({c.nicNumber})
             </label>
           ))}
         </div>
       </div>
 
-      {/* Buttons */}
       <div style={styles.btnRow}>
         <button style={styles.btnCancel} onClick={() => navigate('/')}>Cancel</button>
         <button style={styles.btnSave} onClick={handleSubmit} disabled={loading}>
