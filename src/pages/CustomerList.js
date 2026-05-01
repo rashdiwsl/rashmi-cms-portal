@@ -11,7 +11,7 @@ function CustomerList() {
   useEffect(() => {
     getAllCustomers()
       .then(res => {
-        setCustomers(res.data);
+        setCustomers(res.data.content || res.data);
         setLoading(false);
       })
       .catch(() => {
@@ -55,7 +55,7 @@ function CustomerList() {
                   <td style={styles.td}>{c.name}</td>
                   <td style={styles.td}>{c.nicNumber}</td>
                   <td style={styles.td}>{c.dateOfBirth}</td>
-                  <td style={styles.td}>{c.mobileNumbers?.map(m => m.number).join(', ')}</td>
+                  <td style={styles.td}>{c.mobileNumbers?.join(', ')}</td>
                   <td style={styles.td}>
                     <button style={styles.btnView} onClick={() => navigate(`/customers/${c.id}`)}>View</button>
                     <button style={styles.btnEdit} onClick={() => navigate(`/customers/edit/${c.id}`)}>Edit</button>
