@@ -1,6 +1,3 @@
-import React from 'react';
-export default function Placeholder() { return <div>Coming soon...</div>; }
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllCustomers } from '../api/customerApi';
