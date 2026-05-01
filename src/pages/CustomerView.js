@@ -72,7 +72,7 @@ function CustomerView() {
         {customer.mobileNumbers?.length > 0 ? (
           <ul style={styles.list}>
             {customer.mobileNumbers.map((m, i) => (
-              <li key={i} style={styles.listItem}>{m.number}</li>
+              <li key={i} style={styles.listItem}>{m}</li>
             ))}
           </ul>
         ) : (
@@ -89,8 +89,8 @@ function CustomerView() {
               <p style={styles.addressLine}>{a.addressLine1}</p>
               {a.addressLine2 && <p style={styles.addressLine}>{a.addressLine2}</p>}
               <p style={styles.addressLine}>
-                {a.city?.name}{a.city?.name && a.country?.name ? ', ' : ''}{a.country?.name}
-              </p>
+  City ID: {a.cityId}  Country ID: {a.countryId}
+</p>
             </div>
           ))
         ) : (
