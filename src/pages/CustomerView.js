@@ -88,9 +88,12 @@ function CustomerView() {
             <div key={i} style={styles.addressCard}>
               <p style={styles.addressLine}>{a.addressLine1}</p>
               {a.addressLine2 && <p style={styles.addressLine}>{a.addressLine2}</p>}
-              <p style={styles.addressLine}>
-  City ID: {a.cityId}  Country ID: {a.countryId}
-</p>
+              {/* ✅ Fixed: use cityName and countryName from AddressDTO */}
+              {(a.cityName || a.countryName) && (
+                <p style={styles.addressMeta}>
+                  {[a.cityName, a.countryName].filter(Boolean).join(', ')}
+                </p>
+              )}
             </div>
           ))
         ) : (
@@ -139,7 +142,8 @@ const styles = {
   list: { margin: 0, paddingLeft: '20px' },
   listItem: { padding: '4px 0', fontSize: '14px' },
   addressCard: { background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '12px', marginBottom: '10px' },
-  addressLine: { margin: '2px 0', fontSize: '14px' },
+  addressLine: { margin: '2px 0', fontSize: '14px', color: '#2c3e50' },
+  addressMeta: { margin: '6px 0 2px', fontSize: '13px', color: '#666', fontStyle: 'italic' }, // ✅ new style
   familyGrid: { display: 'flex', flexWrap: 'wrap', gap: '12px' },
   familyCard: { background: '#fff', border: '1px solid #ddd', borderRadius: '6px', padding: '10px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '150px' },
   familyName: { fontWeight: '600', fontSize: '14px' },
