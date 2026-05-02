@@ -9,6 +9,17 @@ React JS frontend for the Customer Management System.
 - React DatePicker (date selection)
 - Maven (backend build tool)
 
+## Screenshots
+
+### Customer List
+![Customer List](screenshots/customer-list.png)
+
+### Add Customer
+![Add Customer](screenshots/add-customer.png)
+
+### Bulk Upload
+![Bulk Upload](screenshots/bulk-upload.png)
+
 ## Prerequisites
 - Node.js 16+
 - npm 8+
@@ -51,3 +62,4 @@ API base URL is configured in `src/api/customerApi.js`:
 ```javascript
 const BASE_URL = 'http://localhost:8080/api/customers';
 ```
+.
