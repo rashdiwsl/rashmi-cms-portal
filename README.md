@@ -18,6 +18,9 @@ React JS frontend for the Customer Management System.
 ![Add Customer](screenshots/add-customer.png)
 
 ### Bulk Upload
+![Customer Details](screenshots/customer-details.png)
+
+### Bulk Upload
 ![Bulk Upload](screenshots/bulk-upload.png)
 
 ## Prerequisites
